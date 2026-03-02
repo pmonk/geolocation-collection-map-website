@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!-- Template created by pmonk.com -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[YOUR_TITLE] - Collection Map</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <!-- Favicons (use relative paths so local file/open or subpath hosting works) -->
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Skip link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <div id="app">
+    <header>
+      <h1><em>[YOUR_COLLECTION_NAME]</em> - [YOUR_NAME]</h1>
+      <p>Mapped images | <a href="#" id="statement-link">Statement</a> | <a href="[YOUR_EXTERNAL_URL]">External Link</a></p>
+    </header>
+
+    <main id="main-content">
+      <section id="map-section">
+        <div id="map" role="region" aria-label="Interactive map"></div>
+      </section>
+      <section id="sidebar">
+        <h2>Works</h2>
+
+        <div id="filters">
+          <div class="filter-group">
+            <label for="filter-year">Year</label>
+            <select id="filter-year">
+              <option value="all">All years</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-tag">Tag contains</label>
+            <input
+              id="filter-tag"
+              type="text"
+              placeholder="e.g. tag1, tag2, tag3"
+            />
+          </div>
+        </div>
+        
+        <div id="tour-controls">
+          <button id="tour-start">Start Tour</button>
+          <button id="tour-prev" disabled>Prev</button>
+          <button id="tour-next" disabled>Next</button>
+        </div>
+
+        <ul id="artwork-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script src="main.js"></script>
+  
+  <!-- Fullscreen image modal -->
+  <div id="image-modal" class="modal-hidden" role="dialog" aria-modal="true" aria-labelledby="modal-caption" aria-hidden="true">
+    <div class="modal-content">
+      <button id="modal-close" aria-label="Close image" type="button">&times;</button>
+      <img id="modal-image" src="" alt="" />
+      <div id="modal-caption"></div>
+    </div>
+  </div>
+
+  <!-- Statement modal -->
+  <div id="statement-modal" class="modal-hidden" role="dialog" aria-modal="true" aria-labelledby="statement-title" aria-hidden="true">
+    <div class="modal-content">
+      <button id="statement-close" aria-label="Close statement" type="button">&times;</button>
+      <h2 id="statement-title">Statement</h2>
+      <p>[YOUR_STATEMENT_HERE]</p>
+    </div>
+  </div>
+
+  <!-- Live region for announcing tour changes to screen readers -->
+  <div id="tour-status" aria-live="polite" class="visually-hidden"></div>
+
+  <script>
+    // Statement modal functionality
+    const statementLink = document.getElementById("statement-link");
+    const statementModal = document.getElementById("statement-modal");
+    const statementClose = document.getElementById("statement-close");
+
+    statementLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      openStatementModal();
+    });
+
+    statementClose.addEventListener("click", closeStatementModal);
+
+    statementModal.addEventListener("click", (e) => {
+      if (e.target === statementModal) closeStatementModal();
+    });
+
+    let statementFocusTrapHandler = null;
+    let lastStatementFocus = null;
+
+    function trapStatementFocus(container) {
+      const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const nodes = Array.from(container.querySelectorAll(focusableSelectors)).filter(n => n.offsetParent !== null);
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+
+      statementFocusTrapHandler = function (e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      document.addEventListener('keydown', statementFocusTrapHandler);
+    }
+
+    function releaseStatementFocusTrap() {
+      if (statementFocusTrapHandler) {
+        document.removeEventListener('keydown', statementFocusTrapHandler);
+        statementFocusTrapHandler = null;
+      }
+    }
+
+    function closeStatementModal() {
+      statementModal.classList.add("modal-hidden");
+      statementModal.setAttribute('aria-hidden', 'true');
+      releaseStatementFocusTrap();
+      if (lastStatementFocus && lastStatementFocus.focus) lastStatementFocus.focus();
+    }
+
+    function openStatementModal() {
+      lastStatementFocus = document.activeElement;
+      statementModal.setAttribute('aria-hidden', 'false');
+      statementModal.classList.remove("modal-hidden");
+      statementClose.focus();
+      trapStatementFocus(statementModal);
+    }
+
+    // Image modal functionality
+    const modal = document.getElementById("image-modal");
+    const modalImg = document.getElementById("modal-image");
+    const modalCaption = document.getElementById("modal-caption");
+    const modalClose = document.getElementById("modal-close");
+
+    // Close handlers
+    modalClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // Focus management for modal
+    let lastFocusedElement = null;
+    let focusTrapHandler = null;
+
+    function trapFocus(container) {
+      const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const nodes = Array.from(container.querySelectorAll(focusableSelectors)).filter(n => n.offsetParent !== null);
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+
+      focusTrapHandler = function (e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      document.addEventListener('keydown', focusTrapHandler);
+    }
+
+    function releaseFocusTrap() {
+      if (focusTrapHandler) {
+        document.removeEventListener('keydown', focusTrapHandler);
+        focusTrapHandler = null;
+      }
+    }
+
+    function closeModal() {
+      modal.classList.add("modal-hidden");
+      modal.setAttribute('aria-hidden', 'true');
+      releaseFocusTrap();
+      if (lastFocusedElement && lastFocusedElement.focus) lastFocusedElement.focus();
+    }
+
+    function openModal(imageSrc, captionText) {
+      lastFocusedElement = document.activeElement;
+      modalImg.src = imageSrc;
+      modalImg.alt = captionText || modalImg.alt;
+      modalCaption.textContent = captionText;
+      modal.setAttribute('aria-hidden', 'false');
+      modal.classList.remove("modal-hidden");
+      modalClose.focus();
+      trapFocus(modal);
+    }
+
+    // CRITICAL: Disable Leaflet's popup click blocking
+    map.on("popupopen", function (e) {
+      const popupEl = e && e.popup && e.popup.getElement && e.popup.getElement();
+      if (!popupEl) return;
+
+      const popupContent = popupEl.querySelector(".leaflet-popup-content");
+      if (!popupContent) return;
+
+      L.DomEvent.disableClickPropagation(popupContent);
+      L.DomEvent.disableScrollPropagation(popupContent);
+      popupContent.setAttribute('tabindex', '-1');
+      popupContent.focus();
+    });
+
+    // Delegated click handler for images inside Leaflet popups
+    document.addEventListener("click", function (ev) {
+      const img = ev.target.closest && ev.target.closest(".leaflet-popup-content img");
+      if (!img) return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      img.style.cursor = "zoom-in";
+      img.style.pointerEvents = "auto";
+      const fullSrc = img.src.replace(/thumbnails\//i, "full/");
+      openModal(fullSrc, img.alt || "Collection item");
+    });
+  </script>
+</body>
+</html>

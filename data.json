@@ -1,0 +1,56 @@
+[
+  {
+    "id": "example_001",
+    "title": "Example Item One",
+    "location": {
+      "lat": 30.2672,
+      "lng": -97.7431,
+      "address": "Austin, TX"
+    },
+    "image": {
+      "thumbnail": "images/thumbnails/example_001.jpg",
+      "full": "images/full/example_001.jpg"
+    },
+    "year": 2024,
+    "medium": "Oil on Canvas",
+    "dimensions": "12 × 16 in",
+    "description": "A description of your first work goes here. This can be as detailed as you like.",
+    "tags": ["tag1", "tag2", "tag3"]
+  },
+  {
+    "id": "example_002",
+    "title": "Example Item Two",
+    "location": {
+      "lat": 30.3015,
+      "lng": -97.8134,
+      "address": "Austin, TX"
+    },
+    "image": {
+      "thumbnail": "images/thumbnails/example_002.jpg",
+      "full": "images/full/example_002.jpg"
+    },
+    "year": 2024,
+    "medium": "Mixed Media",
+    "dimensions": "8 × 10 in",
+    "description": "A description of your second work goes here.",
+    "tags": ["tag1", "tag4"]
+  },
+  {
+    "id": "example_003",
+    "title": "Example Item Three",
+    "location": {
+      "lat": 30.2198,
+      "lng": -97.7436,
+      "address": "Austin, TX"
+    },
+    "image": {
+      "thumbnail": "images/thumbnails/example_003.jpg",
+      "full": "images/full/example_003.jpg"
+    },
+    "year": 2025,
+    "medium": "Watercolor",
+    "dimensions": "6 × 9 in",
+    "description": "Notes about this work.",
+    "tags": ["tag2", "tag5"]
+  }
+]

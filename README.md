@@ -2,6 +2,8 @@
 
 This folder contains genericized template files for creating an interactive, geolocation-based collection map for artworks, projects, or any location-tagged items.
 
+[Live Demo](https://pmonk.github.io/geolocation-collection-map-website/)
+
 ## What's Included
 
 - **index.html** - Main HTML template with modals and interactive interface
@@ -204,3 +206,4 @@ No build step required—serve files directly or use with any static host.
 
 For questions or improvements, refer to Leaflet documentation:
 https://leafletjs.com/
+

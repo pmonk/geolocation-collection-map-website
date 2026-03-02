@@ -19,8 +19,8 @@ This folder contains genericized template files for creating an interactive, geo
    - `[YOUR_TITLE]` - Page title (e.g., "Infrastructure Project")
    - `[YOUR_COLLECTION_NAME]` - Collection display name
    - `[YOUR_NAME]` - Your name or artist name
-   - `[YOUR_PORTFOLIO_URL]` - Link to your portfolio
-   - `[YOUR_ARTIST_STATEMENT_HERE]` - Your artist/project statement
+   - `[YOUR_EXTERNAL_URL]` - Link to your External website or portfolio if any
+   - `[YOUR_STATEMENT_HERE]` - Your artist/project statement
 
 2. **Prepare Data** - Create or replace `data.json` with your items:
    - Follow the structure in the template
@@ -206,4 +206,5 @@ No build step required—serve files directly or use with any static host.
 
 For questions or improvements, refer to Leaflet documentation:
 https://leafletjs.com/
+
 
